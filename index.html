@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vortex Clicker</title>
+    <style>
+        body { background: #050505; color: white; font-family: sans-serif; margin: 0; overflow: hidden; text-align: center; touch-action: manipulation; }
+        #game-container { width: 100vw; height: 100vh; position: relative; }
+        #target { width: 60px; height: 60px; background: radial-gradient(circle, #ff0000, #990000); border-radius: 50%; position: absolute; cursor: pointer; box-shadow: 0 0 20px #ff0000; display: none; }
+        .stats { position: absolute; top: 20px; left: 0; width: 100%; font-size: 24px; font-weight: bold; pointer-events: none; }
+        #start-btn { padding: 15px 40px; font-size: 20px; background: #ff0000; color: white; border: none; border-radius: 10px; margin-top: 45vh; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="stats">النقاط: <span id="score">0</span> | الوقت: <span id="time">30</span></div>
+        <button id="start-btn">ابدأ اللعب</button>
+        <div id="target"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 30;
+        let gameActive = false;
+        const target = document.getElementById('target');
+        const scoreDisplay = document.getElementById('score');
+        const timeDisplay = document.getElementById('time');
+        const startBtn = document.getElementById('start-btn');
+
+        function moveTarget() {
+            const x = Math.random() * (window.innerWidth - 60);
+            const y = Math.random() * (window.innerHeight - 100) + 60;
+            target.style.left = x + 'px';
+            target.style.top = y + 'px';
+            target.style.display = 'block';
+        }
+
+        target.addEventListener('touchstart', (e) => {
+            if (!gameActive) return;
+            score++;
+            scoreDisplay.innerText = score;
+            target.style.display = 'none';
+            setTimeout(moveTarget, 100);
+            e.preventDefault();
+        });
+
+        startBtn.onclick = () => {
+            score = 0;
+            timeLeft = 30;
+            gameActive = true;
+            scoreDisplay.innerText = score;
+            startBtn.style.display = 'none';
+            moveTarget();
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                timeDisplay.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    gameActive = false;
+                    target.style.display = 'none';
+                    startBtn.style.display = 'block';
+                    startBtn.innerText = "انتهى! نقاطك: " + score + " - العب مرة أخرى";
+                }
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
