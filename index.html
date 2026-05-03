@@ -4,18 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vortex Clicker</title>
+    <script src="https://api.unityads.unity3d.com/sdk/3.0/unityads.js"></script>
     <style>
         body { background: #050505; color: white; font-family: sans-serif; margin: 0; overflow: hidden; text-align: center; touch-action: manipulation; }
         #game-container { width: 100vw; height: 100vh; position: relative; }
         #target { width: 60px; height: 60px; background: radial-gradient(circle, #ff0000, #990000); border-radius: 50%; position: absolute; cursor: pointer; box-shadow: 0 0 20px #ff0000; display: none; }
         .stats { position: absolute; top: 20px; left: 0; width: 100%; font-size: 24px; font-weight: bold; pointer-events: none; }
-        #start-btn { padding: 15px 40px; font-size: 20px; background: #ff0000; color: white; border: none; border-radius: 10px; margin-top: 45vh; cursor: pointer; }
+        #start-btn { padding: 15px 40px; font-size: 20px; background: #ff0000; color: white; border: none; border-radius: 10px; margin-top: 40vh; cursor: pointer; z-index: 10; }
+        
+        /* تنسيق زر الإعلان الإضافي */
+        #ad-btn { 
+            padding: 10px 20px; 
+            font-size: 14px; 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #aaa; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            margin-top: 20px; 
+            cursor: pointer; 
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div class="stats">النقاط: <span id="score">0</span> | الوقت: <span id="time">30</span></div>
-        <button id="start-btn">ابدأ اللعب</button>
+        
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <button id="start-btn">ابدأ اللعب</button>
+            <button id="ad-btn" onclick="showAd()">مشاهدة إعلان لدعمنا ❤️</button>
+        </div>
+
         <div id="target"></div>
     </div>
 
@@ -27,6 +46,27 @@
         const scoreDisplay = document.getElementById('score');
         const timeDisplay = document.getElementById('time');
         const startBtn = document.getElementById('start-btn');
+        const adBtn = document.getElementById('ad-btn');
+
+        // --- إعدادات Unity Ads ---
+        const unityGameID = '6104585';
+        const testMode = false; 
+
+        if (typeof unityads !== 'undefined') {
+            unityads.initialize(unityGameID, testMode, (error) => {
+                if (error) console.log('Unity Ads Init Error:', error);
+                else console.log('Unity Ads Initialized!');
+            });
+        }
+
+        function showAd() {
+            if (typeof unityads !== 'undefined') {
+                unityads.show('Interstitial_Android'); 
+            } else {
+                alert("جاري تحميل الإعلان، حاول مرة أخرى..");
+            }
+        }
+        // -------------------------
 
         function moveTarget() {
             const x = Math.random() * (window.innerWidth - 60);
@@ -50,7 +90,7 @@
             timeLeft = 30;
             gameActive = true;
             scoreDisplay.innerText = score;
-            startBtn.style.display = 'none';
+            startBtn.parentElement.style.display = 'none'; // إخفاء الأزرار عند اللعب
             moveTarget();
             
             const timer = setInterval(() => {
@@ -60,8 +100,11 @@
                     clearInterval(timer);
                     gameActive = false;
                     target.style.display = 'none';
-                    startBtn.style.display = 'block';
+                    startBtn.parentElement.style.display = 'flex'; // إظهار الأزرار بعد انتهاء اللعب
                     startBtn.innerText = "انتهى! نقاطك: " + score + " - العب مرة أخرى";
+                    
+                    // إظهار إعلان تلقائي أيضاً عند النهاية
+                    showAd();
                 }
             }, 1000);
         };
